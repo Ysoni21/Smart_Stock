@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Input Form with Data Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #cdf5f9;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #859cfd;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .entry-section,
+        .filter-section,
+        .sort-section {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f9f9f9;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Product Input Form</h1>
+
+        <form method="POST" action="dashboard.php" id="product-form">
+
+            <div class="entry-section">
+                <h3>Add/Edit Entry</h3>
+                <input type="date" id="date" name="date" placeholder="Date" required>
+                <input type="text" id="asin" name="asin" placeholder="ASIN" required>
+                <input type="text" id="product-title" name="product-title" placeholder="Product Title">
+                <input type="text" id="brand" name="brand" placeholder="Brand">
+                <input type="text" id="store-code" name="store_code" placeholder="Store Code">
+                <input type="number" id="ordered-revenue" name="ordered_revenue" placeholder="Ordered Revenue (₹)">
+                <input type="number" id="ordered-units" name="ordered_units" placeholder="Ordered Units">
+                <input type="number" id="shipped-revenue" name="shipped_revenue" placeholder="Shipped Revenue (₹)">
+                <input type="number" id="shipped-units" name="shipped_units" placeholder="Shipped Units">
+                <input type="number" id="customer-returns" name="customer_returns" placeholder="Customer Returns">
+                <button type="submit">Add/Edit Entry</button>
+            </div>
+        
+            <!-- Filter by ASIN -->
+            <div class="filter-section">
+                <label for="filter-asin">Filter by ASIN:</label>
+                <input type="text" id="filter-asin" oninput="filterByAsin()" placeholder="Enter ASIN">
+            </div>
+        
+            <!-- Upload Excel File -->
+            <div class="upload-section">
+                <h3>Upload Excel File</h3>
+                <input type="file" id="excel-file" accept=".xlsx,.xls">
+                <button type="button" onclick="handleFileUpload()">Read and Upload</button>
+                <button type="button" onclick="goToNextPage()" style="margin-top: 10px; margin-left: 17.5px;">Graph page</button>
+            </div>
+        
+            
+        
+            <!-- Sort Table -->
+            <div class="sort-section">
+                <label for="sort-column">Sort by:</label>
+                <select id="sort-column">
+                    <option value="date">Date</option>
+                    <option value="asin">ASIN</option>
+                    <option value="product-title">Product Title</option>
+                    <option value="ordered-revenue">Ordered Revenue</option>
+                    <option value="shipped-revenue">Shipped Revenue</option>
+                    <option value="ordered-units">Ordered Units</option>
+                    <option value="shipped-units">Shipped Units</option>
+                    <option value="customer-returns">Customer Returns</option>
+                </select>
+        
+                <label for="sort-order">Order:</label>
+                <select id="sort-order">
+                    <option value="latest">Latest</option>
+                    <option value="earliest">Earliest</option>
+                    <option value="low-to-high">Low to High</option>
+                    <option value="high-to-low">High to Low</option>
+                    <option value="fewest-to-most">Fewest to Most</option>
+                    <option value="most-to-fewest">Most to Fewest</option>
+                </select>
+        
+                <button type="button" onclick="sortTable()">Sort</button>
+            </div>
+        </form>
+        
+
+        <!-- Data Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>ASIN</th>
+                        <th>Product Title</th>
+                        <th>Brand</th>
+                        <th>Store Code</th>
+                        <th>Ordered Revenue</th>
+                        <th>Ordered Units</th>
+                        <th>Shipped Revenue</th>
+                        <th>Shipped Units</th>
+                        <th>Customer Returns</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <td>2025-01-01</td>
+                        <td>ABC123</td>
+                        <td>Example Product 1</td>
+                        <td>Brand A</td>
+                        <td>IN</td>
+                        <td>₹1000</td>
+                        <td>10</td>
+                        <td>₹900</td>
+                        <td>9</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>2025-01-02</td>
+                        <td>DEF456</td>
+                        <td>Example Product 2</td>
+                        <td>Brand B</td>
+                        <td>IN</td>
+                        <td>₹2000</td>
+                        <td>20</td>
+                        <td>₹1800</td>
+                        <td>18</td>
+                        <td>2</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+<script>
+        document.querySelector("form").addEventListener("submit", function(event) {
+        console.log("Form is being submitted!");
+    });
+
+        // Add/Edit Entry
+        function addOrEditEntry(event) {
+            event.preventDefault();
+            const date = document.getElementById("date").value;
+            const asin = document.getElementById("asin").value.trim();
+            const productTitle = document.getElementById("product-title").value.trim();
+            const brand = document.getElementById("brand").value.trim();
+            const storeCode = document.getElementById("store-code").value.trim();
+            const orderedRevenue = document.getElementById("ordered-revenue").value.trim();
+            const orderedUnits = document.getElementById("ordered-units").value.trim();
+            const shippedRevenue = document.getElementById("shipped-revenue").value.trim();
+            const shippedUnits = document.getElementById("shipped-units").value.trim();
+            const customerReturns = document.getElementById("customer-returns").value.trim();
+
+            if (!date || !asin) {
+                alert("Date and ASIN are required fields.");
+                return;
+            }
+
+            const tableBody = document.getElementById("table-body");
+            let rowUpdated = false;
+
+            // Check if ASIN exists to update it
+            for (let row of tableBody.rows) {
+                if (row.cells[1].textContent === asin) {
+                    row.cells[0].textContent = date; // Date is now the first cell
+                    row.cells[1].textContent = asin; 
+                    row.cells[2].textContent = productTitle;
+                    row.cells[3].textContent = brand;
+                    row.cells[4].textContent = storeCode;
+                    row.cells[5].textContent = orderedRevenue;
+                    row.cells[6].textContent = orderedUnits;
+                    row.cells[7].textContent = shippedRevenue;
+                    row.cells[8]. textContent = shippedUnits;
+                    row.cells[9].textContent = customerReturns;
+                    rowUpdated = true;
+                    break;
+                }
+            }
+
+            // Add a new row if ASIN doesn't exist
+            if (!rowUpdated) {
+                const newRow = tableBody.insertRow();
+                newRow.innerHTML = `
+                    <td>${date}</td> <!-- Date comes first -->
+                    <td>${asin}</td>
+                    <td>${productTitle}</td>
+                    <td>${brand}</td>
+                    <td>${storeCode}</td>
+                    <td>${orderedRevenue}</td>
+                    <td>${orderedUnits}</td>
+                    <td>${shippedRevenue}</td>
+                    <td>${shippedUnits}</td>
+                    <td>${customerReturns}</td>
+                `;
+            }
+
+            alert(rowUpdated ? "Entry updated successfully." : "Entry added successfully.");
+        }
+
+        
+        // Filter by ASIN
+        function filterByAsin() {
+            const filterAsin = document.getElementById("filter-asin").value.trim().toLowerCase();
+            const tableBody = document.getElementById("table-body");
+
+            for (let row of tableBody.rows) {
+                const asin = row.cells[1].textContent.toLowerCase();
+                row.style.display = asin.includes(filterAsin) ? "" : "none";
+            }
+        }
+
+        // Sort Table
+        function sortTable() {
+            const tableBody = document.getElementById("table-body");
+            const sortColumn = document.getElementById("sort-column").value;
+            const sortOrder = document.getElementById("sort-order").value;
+
+            const columnIndexMap = {
+                date: 0,
+                asin: 1,
+                "product-title": 2,
+                brand: 3,
+                "store-code": 4,
+                "ordered-revenue": 5,
+                "ordered-units": 6,
+                "shipped-revenue": 7,
+                "shipped-units": 8,
+                "customer-returns": 9,
+            };
+
+            const columnIndex = columnIndexMap[sortColumn];
+            const rowsArray = Array.from(tableBody.rows);
+
+            rowsArray.sort((a, b) => {
+                let aValue = a.cells[columnIndex].textContent.trim();
+                let bValue = b.cells[columnIndex].textContent.trim();
+
+                // Handle numeric values
+                if (columnIndex >= 5) {
+                    aValue = parseFloat(aValue.replace(/₹|,/g, "")) || 0;
+                    bValue = parseFloat(bValue.replace(/₹|,/g, "")) || 0;
+                }
+
+                // Handle dates
+                if (sortColumn === "date") {
+                    aValue = new Date(aValue);
+                    bValue = new Date(bValue);
+                }
+
+                if (sortOrder === "latest" || sortOrder === "high-to-low" || sortOrder === "most-to-fewest") {
+                    return aValue > bValue ? -1 : 1;
+                } else {
+                    return aValue > bValue ? 1 : -1;
+                }
+            });
+
+            // Append sorted rows back to the table body
+            tableBody.innerHTML = "";
+            rowsArray.forEach((row) => tableBody.appendChild(row));
+        }
+
+        // Handle File Upload (Excel)
+        function handleFileUpload() {
+    const fileInput = document.getElementById("excel-file");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select an Excel file.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Remove header row
+        jsonData.shift();
+
+        // Function to fix Excel date format
+        function formatExcelDate(excelDate) {
+            if (!excelDate) return ""; // Return empty string if no date is provided
+            if (typeof excelDate === "number") {
+                // Convert Excel date number to JavaScript Date
+                let date = new Date((excelDate - 25569) * 86400 * 1000); 
+                return date.toISOString().split("T")[0]; // Format YYYY-MM-DD
+            } else if (typeof excelDate === "string" && excelDate.includes("/")) {
+                // Assume the date is already in a readable format (MM/DD/YYYY or DD/MM/YYYY)
+                let parts = excelDate.split("/");
+                if (parts[2].length === 4) {
+                    return `${parts[2]}-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`; // YYYY-MM-DD
+                }
+            }
+            return excelDate; // Return as is if already in correct format
+        }
+
+        // Prepare data in the required format
+        const formattedData = jsonData.map(row => ({
+            date: formatExcelDate(row[0]), // Convert date format
+            asin: row[1] || "",
+            productTitle: row[2] || "",
+            brand: row[3] || "",
+            storeCode: row[4] || "",
+            orderedRevenue: row[5] || "",
+            orderedUnits: row[6] || "",
+            shippedRevenue: row[7] || "",
+            shippedUnits: row[8] || "",
+            customerReturns: row[9] || ""
+        }));
+
+        // Send data to server
+        fetch("upload_excel.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: formattedData })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert("Data uploaded successfully.");
+                location.reload(); // Refresh to display the new data
+            } else {
+                alert("Error: " + result.message);
+            }
+        })
+        .catch(error => console.error("Error uploading data:", error));
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+function goToNextPage() {
+        window.location.href = "graph.html"; // Change this to the correct next page
+    }
+
+         // Function to Fetch Data from Database
+         function fetchData() {
+            fetch("dashboard.php")
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("table-body").innerHTML = data;
+                })
+                .catch(error => console.error("Error loading data:", error));
+        }
+
+        // Fetch Data when page loads
+        fetchData();
+    </script>
+</body>
+
+</html>

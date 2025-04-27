@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #cdf5f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        select:hover {
+            border-color: #007bff;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+        }
+
+        .average-sales {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #avgSales {
+            color: #007bff;
+            transition: 0.3s;
+        }
+
+        .loading {
+            font-size: 16px;
+            color: #555;
+            margin-top: 10px;
+            display: none;
+        }
+
+        button {
+            background-color: #6b82f7;
+            color: white;
+            border: none;
+            width: auto;
+            cursor: pointer;
+            border-radius: 6.5px;
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Shipped Units Graph</h2>
+        
+        <label for="asinSelect">Select ASIN:</label>
+        <select id="asinSelect"></select>
+
+        <div class="loading" id="loading">Loading data...</div>
+        <div class="chart-container">
+            <canvas id="shippedUnitsChart"></canvas>
+        </div>
+
+        <div class="average-sales">
+            <h3>Average Sales: <span id="avgSales">--</span> units</h3>
+        </div>
+
+        <div class="button" style="display: flex; justify-content: center; gap: 100px; margin-top: 20px;">
+            <button onclick="window.location.href='dashboard.html'">Dashboard</button>
+            <button onclick="window.location.href='forecast.html'" style="margin-left: 10px;">Forecast Page</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const asinSelect = document.getElementById("asinSelect");
+            const avgSalesEl = document.getElementById("avgSales");
+            const loadingEl = document.getElementById("loading");
+            const ctx = document.getElementById("shippedUnitsChart").getContext("2d");
+            let shippedUnitsChart;
+
+            function fetchAsins() {
+                fetch("/site/fetch_asins.php")
+                    .then(response => response.json())
+                    .then(asins => {
+                        asinSelect.innerHTML = "";
+                        if (asins.length === 0) {
+                            asinSelect.innerHTML = "<option disabled>No ASINs found</option>";
+                            return;
+                        }
+                        asins.forEach(asin => {
+                            let option = document.createElement("option");
+                            option.value = asin;
+                            option.textContent = asin;
+                            asinSelect.appendChild(option);
+                        });
+                        fetchData(asinSelect.value);
+                    })
+                    .catch(error => console.error("Error fetching ASINs:", error));
+            }
+
+            function fetchData(asin) {
+                loadingEl.style.display = "block";
+                fetch(`/site/fetch_s_units.php?asin=${asin}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        loadingEl.style.display = "none";
+                        if (data.error || data.length === 0) {
+                            avgSalesEl.textContent = "No Data";
+                            return;
+                        }
+                        const labels = data.map((item, index) => item.date + " (" + (index + 1) + ")");
+                        const shippedUnitsData = data.map(item => Number(item.shipped_units));
+                        updateChart(labels, shippedUnitsData);
+                        calculateAverageSales(shippedUnitsData);
+                    })
+                    .catch(error => {
+                        loadingEl.style.display = "none";
+                        console.error("Error fetching data:", error);
+                    });
+            }
+
+            function updateChart(labels, shippedUnitsData) {
+    if (!shippedUnitsChart) {
+        shippedUnitsChart = new Chart(ctx, {
+            type: "line",
+            data: { labels: labels, datasets: [{
+                label: "Shipped Units",
+                data: shippedUnitsData,
+                borderColor: "#6b82f7",  // Updated color
+                backgroundColor: "rgba(107, 130, 247, 0.1)",  // Matching transparent color
+                borderWidth: 2,
+                fill: true,
+                pointRadius: 4,
+                tension: 0.4
+            }]},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: "Date" } },
+                    y: { title: { display: true, text: "Shipped Units" } }
+                }
+            }
+        });
+    } else {
+        shippedUnitsChart.data.labels = labels;
+        shippedUnitsChart.data.datasets[0].data = shippedUnitsData;
+        shippedUnitsChart.data.datasets[0].borderColor = "#6b82f7";  // Updated color
+        shippedUnitsChart.data.datasets[0].backgroundColor = "rgba(107, 130, 247, 0.1)";  // Updated fill color
+        shippedUnitsChart.update();
+    }
+}
+
+
+            function calculateAverageSales(data) {
+                if (data.length === 0) return;
+                const total = data.reduce((sum, value) => sum + parseInt(value), 0);
+                const avg = (total / data.length).toFixed(2);
+                avgSalesEl.textContent = avg;
+            }
+
+            fetchAsins();
+            asinSelect.addEventListener("change", function () { fetchData(this.value); });
+            
+        });
+    </script>
+</body>
+</html>

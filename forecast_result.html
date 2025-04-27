@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecasted Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #cdf5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 900px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #859cfd;
+            color: white;
+        }
+        .back-btn {
+    display: block;
+    width: auto; /* Adjust width automatically */
+    padding: 12px 30px; /* Reduce padding */
+    font-size: 12px; /* Reduce font size */
+    background: #6b82f7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px auto 0; /* Centers horizontally */
+    text-align: center;
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Forecasted Data</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ASIN</th>
+                    <th>Product Name</th>
+                    <th>Average Sales</th>
+                    <th>Non-Event Sale</th>
+                    <th>Event Sale</th>
+                    <th>Total Inventory Required</th>
+                    <th>Inventory Left Next Month</th>
+                    <th>Sales Average</th>
+                </tr>
+            </thead>
+            <tbody id="forecastTableBody">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px;">
+            <a href="forecast.html" class="back-btn" style="text-decoration: none; text-align: center;">Back to Forecast</a>
+            <a href="dashboard.html" class="back-btn" style="text-decoration: none; text-align: center;">Back to Dashboard</a>
+        </div>
+        
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("fetch_forecast_data.php")
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById("forecastTableBody");
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>No forecast data available</td></tr>";
+                        return;
+                    }
+
+                    data.forEach(row => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${row.asin}</td>
+                            <td>${row.product_name}</td>
+                            <td>${row.average_sales}</td>
+                            <td>${row.non_event_sale}</td>
+                            <td>${row.event_sale}</td>
+                            <td>${row.total_inventory_required}</td>
+                            <td>${row.inventory_left_next_month}</td>
+                            <td>${row.sales_average}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error("Error fetching forecast data:", error));
+        });
+    </script>
+
+</body>
+</html>

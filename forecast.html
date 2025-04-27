@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecast Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #cdf5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 600px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 22px;
+            color: #333;
+        }
+        .input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.input-group label {
+    flex: 1; /* Makes label take up equal space */
+    text-align: left; 
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+.input-group select,
+.input-group input {
+    flex: 2; /* Makes input fields take up more space */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+        .result {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        /* Button Styling */
+.calculate-btn {
+    display: block;
+    margin: 20px auto 0;
+    width: auto; /* Adjust width automatically */
+    padding: 12px 30px;
+    font-size: 12px;
+    background: #6b82f7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+}
+
+.calculate-btn:hover {
+    background: #5a70e0;
+}
+
+/* New class for Forecast Data and Graph Page buttons */
+.forecast-btn,
+.graph-btn {
+    width: auto;
+    padding: 12px 20px;
+    font-size: 12px;
+    background: #6b82f7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+}
+
+/* Button Group for aligning buttons horizontally */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+    margin-top: 10px;
+}
+
+.button-group button {
+    flex: 1;
+    text-align: center;
+}
+
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Forecast Page</h1>
+        <div class="input-group">
+            <label for="asinSelect">ASIN:</label>
+            <select id="asinSelect">
+                <option value="">Select ASIN</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" readonly>
+        </div>
+        <div class="input-group">
+            <label for="avgSales">Average Sales:</label>
+            <input type="text" id="avgSales" readonly>
+        </div>
+        <div class="input-group">
+            <label for="multiplier">Multiplier:</label>
+            <input type="number" id="multiplier" step="0.1">
+        </div>
+        <div class="input-group">
+            <label for="inventory">Inventory:</label>
+            <input type="number" id="inventory">
+        </div>
+        <div class="input-group">
+            <label for="nonEventDays">Non-Event Days:</label>
+            <input type="number" id="nonEventDays">
+        </div>
+        <div class="input-group">
+            <label for="eventDays">Event Days:</label>
+            <input type="number" id="eventDays">
+        </div>
+        
+        
+        <button id="calculateBtn" class="calculate-btn">Calculate</button>
+       
+        
+
+        <div class="result">Non-Event Sale: <span id="nonEventSale">0</span></div>
+        <div class="result">Event Sale: <span id="eventSale">0</span></div>
+        <div class="result">Sales Average: <span id="salesAverage">0</span></div>
+        <div class="result">Total Inventory Required: <span id="totalInventory">0</span></div>
+        <div class="result">Inventory Left for Next Month: <span id="inventoryLeft">0</span></div>
+        <div class="button-group">
+            <button id="viewForecastDataBtn" class="forecast-btn">View Forecast Data</button>
+            <button id="viewGraphPageBtn" class="graph-btn">View Graph Page</button>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    // Get Elements
+    const asinSelect = document.getElementById("asinSelect");
+    const productTitleInput = document.getElementById("productName");
+    const avgSalesInput = document.getElementById("avgSales");
+    const multiplierInput = document.getElementById("multiplier");
+    const inventoryInput = document.getElementById("inventory");
+    const nonEventDaysInput = document.getElementById("nonEventDays");
+    const eventDaysInput = document.getElementById("eventDays");
+    const calculateBtn = document.getElementById("calculateBtn");
+
+    const nonEventSaleEl = document.getElementById("nonEventSale");
+    const eventSaleEl = document.getElementById("eventSale");
+    const totalInventoryEl = document.getElementById("totalInventory");
+    const inventoryLeftEl = document.getElementById("inventoryLeft");
+
+    const salesAverageSpan = document.getElementById("salesAverage");
+    
+    const viewForecastDataBtn = document.getElementById("viewForecastDataBtn");
+    const viewGraphPageBtn = document.getElementById("viewGraphPageBtn");
+
+    // 🔹 Ensure buttons exist before adding event listeners
+    if (viewForecastDataBtn && viewGraphPageBtn) {
+        viewForecastDataBtn.addEventListener("click", function () {
+            console.log("📌 Redirecting to forecast_result.html...");
+            window.location.href = "forecast_result.html";
+        });
+
+        viewGraphPageBtn.addEventListener("click", function () {
+            console.log("📌 Redirecting to graph.html...");
+            window.location.href = "graph.html";
+        });
+    } else {
+        console.error("❌ Buttons not found in the DOM.");
+    }
+
+    if (!calculateBtn) {
+        console.error("❌ Calculate button not found.");
+        return;
+    }
+
+    function fetchAsins() {
+        fetch("fetch_asins.php")
+            .then(response => response.json())
+            .then(asins => {
+                asinSelect.innerHTML = "";
+                if (!asins || !Array.isArray(asins) || asins.length === 0) {
+                    asinSelect.innerHTML = "<option disabled selected>No ASINs found</option>";
+                    return;
+                }
+
+                asins.forEach(asin => {
+                    let option = document.createElement("option");
+                    option.value = asin;
+                    option.textContent = asin;
+                    asinSelect.appendChild(option);
+                });
+
+                asinSelect.selectedIndex = 0;
+                fetchData();
+            })
+            .catch(error => console.error("❌ Error fetching ASINs:", error));
+    }
+
+    function fetchData() {
+        let asin = asinSelect.value;
+        if (!asin) {
+            console.warn("⚠️ ASIN is empty or undefined.");
+            return;
+        }
+
+        fetch("forecast.php?asin=" + encodeURIComponent(asin))
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("❌ Error fetching data:", data.error);
+                    return;
+                }
+
+                productTitleInput.value = data.product_title || "";
+                avgSalesInput.value = data.average_sales || "";
+            })
+            .catch(error => console.error("❌ Error fetching data:", error));
+    }
+
+    function calculateForecast() {
+        let avgSales = parseInt(avgSalesInput.value) || 0;
+        let inventory = parseInt(inventoryInput.value) || 0;
+        let nonEventDays = parseInt(nonEventDaysInput.value) || 0;
+        let eventDays = parseInt(eventDaysInput.value) || 0;
+        let multiplier = parseFloat(multiplierInput.value) || 1;
+
+        let salesAverage = Math.round(avgSales * multiplier);
+        let nonEventSale = Math.round(avgSales * nonEventDays);
+        let eventSale = Math.round(salesAverage * eventDays);
+        let totalInventoryRequired = nonEventSale + eventSale;
+        let inventoryLeftNextMonth = inventory - totalInventoryRequired;
+
+        salesAverageSpan.textContent = salesAverage;
+        nonEventSaleEl.textContent = nonEventSale;
+        eventSaleEl.textContent = eventSale;
+        totalInventoryEl.textContent = totalInventoryRequired;
+        inventoryLeftEl.textContent = inventoryLeftNextMonth;
+
+        saveForecastData(asinSelect.value, productTitleInput.value, avgSales, nonEventSale, eventSale, totalInventoryRequired, inventoryLeftNextMonth, salesAverage);
+    }
+
+    function saveForecastData(asin, productName, avgSales, nonEventSale, eventSale, totalInventoryRequired, inventoryLeftNextMonth, salesAverage) {
+        let data = {
+            asin: asin,
+            product_name: productName,
+            average_sales: avgSales,
+            non_event_sale: nonEventSale,
+            event_sale: eventSale,
+            total_inventory_required: totalInventoryRequired,
+            inventory_left_next_month: inventoryLeftNextMonth,
+            sales_average: salesAverage
+        };
+
+        fetch("forecasted.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams(data)
+        })
+        .then(response => response.text())
+        .then(result => {
+            try {
+                let jsonData = JSON.parse(result);
+                if (jsonData.success) {
+                    alert("✅ Forecast data saved successfully!");
+                } else {
+                    alert("❌ Error: " + jsonData.error);
+                }
+            } catch (e) {
+                console.error("❌ JSON Parsing Error:", e, "Response:", result);
+            }
+        })
+        .catch(error => console.error("❌ Fetch error:", error));
+    }
+
+    // Attach event listeners
+    asinSelect.addEventListener("change", fetchData);
+    calculateBtn.addEventListener("click", calculateForecast);
+
+    // Fetch ASINs when the page loads
+    fetchAsins();
+});
+
+
+
+
+</script>
+    
+</body>
+</html>

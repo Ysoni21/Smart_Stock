@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login page</title>
+    <!-- Include Font Awesome for Eye Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+    
+        html,
+        body {
+          height: 100%;
+          overflow: hidden;
+        }
+    
+        .auth-container {
+          background-color: #cdf5f9;
+          box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          overflow: hidden;
+          padding: 32px 20px;
+        }
+    
+        .auth-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+          max-width: 513px;
+        }
+    
+        .auth-form-container {
+          border-radius: var(--Corner-Large, 16px);
+          box-shadow: var(--sds-size-depth-0) var(--sds-size-depth-400) var(--sds-size-depth-800) var(--sds-size-depth-negative-200) var(--sds-color-black-400);
+          background-color: #b6c3fa;
+          display: flex;
+          flex-direction: column;
+          font-family: Inter, sans-serif;
+          justify-content: center;
+          padding: 16px 51px;
+          width: 100%;
+          max-width: 100%;
+        }
+    
+        .form-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+        }
+    
+        .form-header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          color: rgba(0, 0, 0, 1);
+          text-align: center;
+        }
+    
+        .form-title {
+          font-size: 24px;
+          font-weight: 600;
+          letter-spacing: -0.24px;
+        }
+    
+        .form-group {
+          display: flex;
+          margin-top: 25px;
+          width: 100%;
+          max-width: 400px;
+          flex-direction: column;
+          font-weight: 500;
+        }
+    
+        .visually-hidden {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          border: 0;
+        }
+    
+        .email-input,
+        .password-input {
+          border-radius: 8px;
+          background-color: rgba(255, 255, 255, 1);
+          min-height: 40px;
+          width: 100%;
+          font-size: 20px;
+          color: #828282;
+          text-align: center;
+          padding: 5px 16px;
+          border: 1px solid rgba(224, 224, 224, 1);
+          position: relative;
+        }
+    
+        .password-group {
+          position: relative;
+        }
+    
+        .toggle-password {
+          position: absolute;
+          right: 10px;
+          top: 65%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          font-size: 20px;
+          cursor: pointer;
+        }
+    
+        .eye-icon {
+          font-size: 18px;
+        }
+    
+        .submit-button {
+          border-radius: 8px;
+          background-color: rgba(0, 0, 0, 1);
+          margin-top: 16px;
+          min-height: 40px;
+          width: 100%;
+          font-size: 16px;
+          color: #fff;
+          padding: 8px 16px;
+          border: none;
+          cursor: pointer;
+          align-items: center;
+        }
+    
+        @media (max-width: 991px) {
+          .auth-container {
+            padding: 100px 20px;
+          }
+    
+          .brand-title {
+            font-size: 40px;
+            line-height: 67px;
+          }
+    
+          .auth-form-container {
+            max-width: 100%;
+            padding: 0 20px;
+          }
+        }
+      </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-wrapper">
+          <div class="auth-form-container">
+            
+            <p id="error-message" class="error" style="color: red; text-align: center;"></p>
+    
+            <form class="form-content" action="login.php" method="POST">
+              <div class="form-header">
+                  <h2 class="form-title">Login your account to Smart Stock</h2>
+              </div>
+              <div id="errorMessage" class="error" style="display: none;"></div>
+          
+              <div class="form-group">
+                  <label for="emailInput">Enter your E-mail</label>
+                  <input type="email" id="emailInput" name="email" class="email-input" placeholder="Enter your email" required />
+              </div>
+          
+              <div class="form-group password-group">
+                  <label for="passwordInput">Enter your password</label>
+                  <input type="password" id="passwordInput" name="password" class="password-input" placeholder="Enter your password" required />
+                  <!-- Eye Icon Button -->
+                  <button type="button" class="toggle-password">
+                      <i class="fas fa-eye-slash" id="eyeIcon"></i>
+                  </button>
+              </div>
+          
+              <button type="submit" class="submit-button">Login</button>
+          </form>
+          
+          </div>
+        </div>
+      </div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const togglePasswordButton = document.querySelector('.toggle-password');
+          const passwordInput = document.getElementById('passwordInput');
+          const eyeIcon = document.getElementById('eyeIcon');
+          const errorMessageElement = document.getElementById('error-message');
+        
+          // Toggle password visibility
+          togglePasswordButton.addEventListener('click', () => {
+            const isPasswordVisible = passwordInput.type === 'text';
+            passwordInput.type = isPasswordVisible ? 'password' : 'text';
+            
+            // Toggle the eye icon
+            if (isPasswordVisible) {
+              eyeIcon.classList.remove('fa-eye');
+              eyeIcon.classList.add('fa-eye-slash');
+            } else {
+              eyeIcon.classList.remove('fa-eye-slash');
+              eyeIcon.classList.add('fa-eye');
+            }
+          });
+    
+          const urlParams = new URLSearchParams(window.location.search);
+          const error = urlParams.get('error');
+          if (error) {
+            if (error === 'email_not_registered') {
+              errorMessageElement.textContent = 'This email is not registered. Please sign up first.';
+            } else if (error === 'incorrect_password') {
+              errorMessageElement.textContent = 'The password you entered is incorrect. Please try again.';
+            }
+          }
+        });
+</script>
+</body>
+</html>

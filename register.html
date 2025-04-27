@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <!-- Include Font Awesome for Eye Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+    
+        html, body {
+          height: 100%;
+          overflow: hidden;
+        }
+        .auth-container {
+          background-color: #cdf5f9;
+          box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          overflow: hidden;
+          padding: 32px 20px;
+        }
+    
+        .auth-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+          max-width: 513px;
+        }
+    
+        .auth-form-container {
+          border-radius: 16px;
+          background-color: #b6c3fa;
+          display: flex;
+          flex-direction: column;
+          font-family: Inter, sans-serif;
+          justify-content: center;
+          padding: 16px 51px;
+          width: 100%;
+        }
+    
+        .form-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+        }
+    
+        .form-header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          color: rgba(0, 0, 0, 1);
+          text-align: center;
+        }
+    
+        .form-title {
+          font-size: 28px;
+          font-weight: 600;
+        }
+    
+        .form-group {
+          display: flex;
+          margin-top: 25px;
+          width: 100%;
+          max-width: 400px;
+          flex-direction: column;
+        }
+    
+        .input-field {
+          border-radius: 8px;
+          background-color: rgba(255, 255, 255, 1);
+          min-height: 40px;
+          width: 100%;
+          font-size: 20px;
+          color: #828282;
+          text-align: center;
+          padding: 5px 16px;
+          border: 1px solid rgba(224, 224, 224, 1);
+        }
+    
+        .password-group {
+          position: relative;
+        }
+    
+        .toggle-password {
+          position: absolute;
+          right: 10px;
+          top: 65%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          font-size: 20px;
+          cursor: pointer;
+        }
+    
+        .submit-button {
+          border-radius: 8px;
+          background-color: rgba(0, 0, 0, 1);
+          margin-top: 16px;
+          min-height: 40px;
+          width: 100%;
+          font-size: 16px;
+          color: #fff;
+          padding: 8px 16px;
+          border: none;
+          cursor: pointer;
+          align-items: center;
+        }
+    
+        @media (max-width: 991px) {
+          .auth-container {
+            padding: 100px 20px;
+          }
+        }
+      </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-wrapper">
+        <div class="auth-form-container">
+            <form id="Register" class="form-content" action="register.php" method="post">
+                <div class="form-header">
+                    <h2 class="form-title">Register your account with SmartStock</h2>
+                </div>
+                <div class="form-group">
+                    <label for="emailInput">Enter your E-mail</label>
+                    <input type="email" id="emailInput" name="email" class="input-field" placeholder="Enter your email" required />
+                </div>
+                <div class="form-group password-group">
+                    <label for="passwordInput">Enter your password</label>
+                    <input type="password" id="passwordInput" name="password" class="input-field" placeholder="Enter your password" required />
+                    <!-- Eye Icon Button -->
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
+                        <i class="fas fa-eye-slash" id="eyeIcon"></i>
+                    </button>
+                </div>
+                <button type="submit" class="submit-button">Register</button>            
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+        function togglePasswordVisibility() {
+          const passwordInput = document.getElementById('passwordInput');
+          const eyeIcon = document.getElementById('eyeIcon');
+          const isPasswordVisible = passwordInput.type === 'text';
+          passwordInput.type = isPasswordVisible ? 'password' : 'text';
+          
+          // Toggle eye icon between open and closed
+          if (isPasswordVisible) {
+              eyeIcon.classList.remove('fa-eye');
+              eyeIcon.classList.add('fa-eye-slash');
+          } else {
+              eyeIcon.classList.remove('fa-eye-slash');
+              eyeIcon.classList.add('fa-eye');
+          }
+        }
+</script>
+</body>
+</html>
